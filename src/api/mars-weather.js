@@ -23,8 +23,24 @@ const BASE_URL = "https://api.nasa.gov/insight_weather/?";
 let cacheTime;
 let cacheData;
 
-router.get('/', limiter,speedLimiter, async (req, res, next) => {
-  /// in memory cache
+const apiKeys = new Map();
+apiKeys.set("12345", true);
+
+
+router.get('/', limiter,speedLimiter, ( req, res, next) =>{
+
+  const apikey = req.get("X-API-KEY");
+
+  if(apiKeys.has(apikey)) {
+    next()
+  }else {
+    const error = new Error("Invalid API KEY")
+    return next(error)
+  }
+
+}, async (req, res, next) => {
+  
+ //in memory cache
   if (cacheTime && cacheTime > Date.now() - 30 * 1000) {
         
     return res.json(cacheData)
